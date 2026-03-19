@@ -415,7 +415,7 @@
 
             <!-- film screen with emoji -->
             <div class="film-screen">
-                <div class="emojis-display" id="emojiQuestion">🦁👑</div>
+                <div class="emojis-display" id="emojiQuestion">Example</div>
             </div>
 
             <!-- GOLD ARROWS -->
@@ -426,13 +426,13 @@
 
             <!-- golden action row: CHECK and RESTART -->
             <div class="gold-button-row">
-                <button class="gold-btn" id="checkScoreBtn">✅ CHECK & ОТГОВОРИ</button>
+                <button class="gold-btn" id="checkScoreBtn"> CHECK </button>
                 <button class="gold-btn small" id="restartFromQuizBtn">↺ нов филм</button>
             </div>
 
             <!-- REVEAL ANSWERS SECTION (hidden at first, appears after CHECK) -->
             <div id="answersContainer" class="answers-reveal" style="display: none;">
-                <h3>📜 ОТГОВОРИ (златна колекция)</h3>
+                <h3>📜 ОТГОВОРИ </h3>
                 <div id="answersList"></div>
                 <div style="text-align: center; margin-top: 1rem;">
                     <button class="gold-btn small" id="revealNextAnswerBtn">✨ разкрий следващ</button>
@@ -440,7 +440,7 @@
                 <p style="color:#bbaa77; margin-top:1rem; font-style:italic;">Натискай бутона за отговор по отговор</p>
             </div>
 
-            <div class="footer-note">🍿 златни пуканки · завесата се вдига с блясък</div>
+            <div class="footer-note"></div>
         </div>
     </div>
 
@@ -459,7 +459,7 @@
             // ---------- MOVIE DATA ----------
             const quizData = [
                 { emoji: "🦁👑", title: "Цар Лъв" },
-                { emoji: "😬🤴🤴😬", title: "Титаник" },
+                { emoji: "😬🤴🎙", title: "Речта на краля" },
                 { emoji: "🧙‍♂️💍🌋", title: "Властелинът на пръстените" },
                 { emoji: "🦖🏝️", title: "Джурасик парк" },
                 { emoji: "🚀👨‍🚀🌌", title: "Интерстелар / Марсианецът" },
@@ -612,7 +612,7 @@
                     renderAnswersList();
                 }
                 if (answersRevealedCount === quizData.length) {
-                    revealNextBtn.textContent = '✅ всички разкрити';
+                    revealNextBtn.textContent = '✅ Всички са разкрити';
                     revealNextBtn.disabled = true;
                 }
             }
@@ -626,12 +626,12 @@
                 answersRevealedCount = 0;
                 renderAnswersList();
                 revealNextBtn.disabled = false;
-                revealNextBtn.textContent = '✨ разкрий следващ';
+                revealNextBtn.textContent = '✨ Разкрий следващ';
                 // show result popup
                 const total = quizData.length;
                 const current = currentIndex + 1;
-                resultHeading.innerText = `🍿 ВЪПРОС ${current}/${total}`;
-                resultText.innerText = 'Ето отговорите — разкривай ги бавно със златния бутон.';
+                resultHeading.innerText = `🍿 Question ${current}/${total}`;
+                resultText.innerText = 'Отговори';
                 resultEmoji.innerText = '🏆';
                 resultPopcorn.style.display = 'flex';
             }
