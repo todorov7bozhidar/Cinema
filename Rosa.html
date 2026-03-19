@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍿 CINEMA QUIZ </title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Poppins', system-ui, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #0a0c14;
+            background-image: radial-gradient(circle at 30% 40%, #2f2a1f 0%, #030303 90%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        /* main cinema stage */
+        .cinema-stage {
+            width: 100%;
+            max-width: 960px;
+            background: #0f0e12;
+            border-radius: 60px 60px 40px 40px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.9), 0 0 0 2px #b8860b inset, 0 0 0 4px #2a2418 inset;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* red curtain (opened/closed) */
+        .curtain {
+            background: linear-gradient(145deg, #a61010 0%, #6d0a0a 80%);
+            position: relative;
+            transition: transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transform-origin: top center;
+            padding: 2rem 2rem 1.5rem 2rem;
+            border-bottom: 6px solid #e5b13b;
+        }
+
+        .curtain.closed {
+            transform: translateY(0);
+        }
+
+        .curtain.open {
+            transform: translateY(-100%);
+            position: absolute;
+            width: 100%;
+            z-index: -1;
+        }
+
+        .curtain-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.8rem;
+            text-align: center;
+        }
+
+        .curtain h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            background: linear-gradient(180deg, #f5d742, #ca9e1e);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 4px 10px #ffd70055, 0 0 20px gold;
+            letter-spacing: 4px;
+        }
+
+        .gold-popcorn {
+            font-size: 4rem;
+            filter: drop-shadow(0 8px 6px #00000070);
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .raise-curtain-btn {
+            background: #eec60e;
+            border: none;
+            font-size: 1.8rem;
+            font-weight: bold;
+            padding: 1rem 3rem;
+            border-radius: 60px;
+            color: #1f1b0c;
+            box-shadow: 0 10px 0 #a57c1a, 0 10px 30px gold;
+            cursor: pointer;
+            transition: 0.1s;
+            margin: 1rem 0 0.5rem;
+            border: 2px solid #ffec9e;
+        }
+
+        .raise-curtain-btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 5px 0 #a57c1a, 0 15px 30px #ffd966;
+        }
+
+        /* main quiz panel (after curtain) */
+        .quiz-panel {
+            background: #191724ed;
+            background-image: repeating-linear-gradient(45deg, #2b2738 0px, #2b2738 2px, #1f1d2b 2px, #1f1d2b 8px);
+            padding: 2.5rem 2rem 2rem;
+            border-radius: 0 0 50px 50px;
+            border-top: 6px solid #e5b13b;
+            box-shadow: inset 0 0 40px #000000aa, 0 -10px 30px #000000;
+        }
+
+        /* top gold bar */
+        .golden-trim {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1d191f;
+            padding: 0.8rem 1.8rem;
+            border-radius: 100px;
+            border: 2px solid #f5c542;
+            box-shadow: 0 0 0 2px #5f4b1e, inset 0 0 10px #b48c34;
+            margin-bottom: 2rem;
+        }
+
+        .q-counter {
+            background: #00000055;
+            color: #ffdf8c;
+            font-weight: 700;
+            font-size: 1.4rem;
+            padding: 0.4rem 1.5rem;
+            border-radius: 40px;
+            border: 1px solid #f5c542;
+            backdrop-filter: blur(4px);
+        }
+
+        .popcorn-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #00000033;
+            padding: 0.2rem 1.5rem 0.2rem 1rem;
+            border-radius: 40px;
+            border: 1px solid #ffd966;
+        }
+
+        .popcorn-badge span {
+            font-size: 1.8rem;
+            filter: drop-shadow(0 0 6px gold);
+        }
+
+        .popcorn-badge .timer {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffe68f;
+            min-width: 55px;
+            text-align: center;
+        }
+
+        /* emoji screen – like film screen */
+        .film-screen {
+            background: #11131f;
+            border-radius: 50px;
+            padding: 3.5rem 1rem;
+            margin: 1rem 0 2rem;
+            border: 4px solid #d8b142;
+            box-shadow: 0 0 0 6px #00000055, 0 20px 40px black, inset 0 -5px 30px #5f4e1e;
+            text-align: center;
+            position: relative;
+        }
+
+        .film-screen::before {
+            content: "🍿";
+            position: absolute;
+            top: -20px;
+            left: 40px;
+            font-size: 2.5rem;
+            filter: drop-shadow(0 0 8px gold);
+            opacity: 0.6;
+            transform: rotate(-15deg);
+        }
+
+        .film-screen::after {
+            content: "🍿";
+            position: absolute;
+            bottom: -20px;
+            right: 40px;
+            font-size: 2.5rem;
+            filter: drop-shadow(0 0 8px gold);
+            opacity: 0.6;
+            transform: rotate(15deg);
+        }
+
+        .emojis-display {
+            font-size: 6.5rem;
+            line-height: 1.4;
+            word-break: keep-all;
+            filter: drop-shadow(0 0 20px #ffd700);
+            letter-spacing: 15px;
+            text-shadow: 0 0 30px #f5c542;
+        }
+
+        /* gold arrows */
+        .nav-arrows {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin: 1.2rem 0 1.8rem;
+        }
+
+        .arrow-btn {
+            background: #2e2a3b;
+            border: 3px solid #f5c542;
+            font-size: 3.8rem;
+            width: 100px;
+            height: 100px;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #ffd966;
+            box-shadow: 0 8px 0 #6d4f1a, 0 0 20px #ffd90080;
+            transition: 0.08s linear;
+        }
+
+        .arrow-btn:hover:not(:disabled) {
+            background: #4a415b;
+            transform: scale(1.02);
+            border-color: #ffd966;
+        }
+
+        .arrow-btn:active:not(:disabled) {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #6d4f1a, 0 0 30px gold;
+        }
+
+        .arrow-btn:disabled {
+            opacity: 0.3;
+            border-color: #7a6d47;
+            box-shadow: none;
+        }
+
+        /* golden button row */
+        .gold-button-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0 1rem;
+        }
+
+        .gold-btn {
+            background: #d6a741;
+            border: none;
+            font-size: 1.5rem;
+            font-weight: 700;
+            padding: 0.9rem 2.8rem;
+            border-radius: 40px;
+            color: #1b1709;
+            box-shadow: 0 8px 0 #7a5c20, 0 0 20px #f5c542;
+            cursor: pointer;
+            transition: 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border: 2px solid #ffd966;
+        }
+
+        .gold-btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #7a5c20, 0 0 30px #ffd966;
+        }
+
+        .gold-btn.small {
+            font-size: 1.2rem;
+            padding: 0.7rem 1.8rem;
+            background: #40381e;
+            color: #ffdfa0;
+            box-shadow: 0 5px 0 #2a1f0a;
+        }
+
+        /* answers reveal area (initially hidden) */
+        .answers-reveal {
+            background: #0a081ac9;
+            backdrop-filter: blur(8px);
+            border-radius: 50px;
+            padding: 1.8rem;
+            margin: 2rem 0 0.5rem;
+            border: 3px solid #ffd966;
+            box-shadow: inset 0 0 30px #aa8e41;
+            transition: 0.3s;
+        }
+
+        .answers-reveal h3 {
+            color: #ffd966;
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            letter-spacing: 2px;
+        }
+
+        .answer-item {
+            display: flex;
+            align-items: baseline;
+            gap: 1rem;
+            font-size: 1.3rem;
+            padding: 0.5rem 1rem;
+            border-bottom: 1px dashed #5f4e2e;
+            color: #f5e1b0;
+        }
+
+        .answer-emoji {
+            font-size: 2rem;
+            min-width: 90px;
+            text-align: center;
+            filter: drop-shadow(0 0 6px gold);
+        }
+
+        .answer-title {
+            font-weight: 500;
+            color: white;
+        }
+
+        .hidden-answer {
+            opacity: 0.4;
+            transition: 0.2s;
+        }
+
+        .hidden-answer .answer-title {
+            filter: blur(4px);
+            user-select: none;
+        }
+
+        .reveal-btn-small {
+            background: transparent;
+            border: 2px solid #ffd966;
+            color: #ffd966;
+            border-radius: 30px;
+            padding: 0.3rem 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-left: auto;
+        }
+
+        .footer-note {
+            color: #5f5a70;
+            text-align: center;
+            font-size: 0.9rem;
+            margin-top: 2rem;
+        }
+
+        /* curtain open state */
+        #curtain.closed ~ .quiz-panel {
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        /* result overlay (golden) */
+        .result-popcorn {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000000dd;
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .result-card-gold {
+            background: #1e1a29;
+            border: 6px solid #f5c542;
+            border-radius: 70px;
+            padding: 3rem;
+            text-align: center;
+            box-shadow: 0 0 50px #ffd700, inset 0 0 30px #7a5f2b;
+        }
+
+        .result-card-gold h2 {
+            font-size: 3rem;
+            color: #ffd966;
+        }
+    </style>
+</head>
+<body>
+    <div class="cinema-stage">
+        <!-- Curtain section (red curtain) -->
+        <div id="curtain" class="curtain">
+            <div class="curtain-content">
+                <div class="gold-popcorn">
+                    <span>🍿</span><span>✨</span><span>🍿</span>
+                </div>
+                <h1>CINEMA QUIZ</h1>
+                <div style="color:#ffdb9f; font-size:1.3rem;">Познайте филма!</div>
+                <button class="raise-curtain-btn" id="raiseCurtainBtn">🎬 ВДИГНИ ЗАВЕСАТА</button>
+                <div style="color:#ebb434;">25 филма</div>
+            </div>
+        </div>
+
+        <!-- Main quiz panel (always there, but hidden under curtain until raised) -->
+        <div class="quiz-panel" id="quizPanel">
+            <!-- golden top bar -->
+            <div class="golden-trim">
+                <div class="q-counter" id="questionCounter">1 / 25</div>
+                <div class="popcorn-badge">
+                    <span>⏳</span>
+                    <span class="timer" id="timerDisplay">30</span>
+                    <span style="color:#c2a256;">sec</span>
+                    <span style="font-size:2rem;">🍿</span>
+                </div>
+            </div>
+
+            <!-- film screen with emoji -->
+            <div class="film-screen">
+                <div class="emojis-display" id="emojiQuestion">🦁👑</div>
+            </div>
+
+            <!-- GOLD ARROWS -->
+            <div class="nav-arrows">
+                <button class="arrow-btn" id="prevBtn" disabled>←</button>
+                <button class="arrow-btn" id="nextBtn">→</button>
+            </div>
+
+            <!-- golden action row: CHECK and RESTART -->
+            <div class="gold-button-row">
+                <button class="gold-btn" id="checkScoreBtn">✅ CHECK & ОТГОВОРИ</button>
+                <button class="gold-btn small" id="restartFromQuizBtn">↺ нов филм</button>
+            </div>
+
+            <!-- REVEAL ANSWERS SECTION (hidden at first, appears after CHECK) -->
+            <div id="answersContainer" class="answers-reveal" style="display: none;">
+                <h3>📜 ОТГОВОРИ (златна колекция)</h3>
+                <div id="answersList"></div>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button class="gold-btn small" id="revealNextAnswerBtn">✨ разкрий следващ</button>
+                </div>
+                <p style="color:#bbaa77; margin-top:1rem; font-style:italic;">Натискай бутона за отговор по отговор</p>
+            </div>
+
+            <div class="footer-note">🍿 златни пуканки · завесата се вдига с блясък</div>
+        </div>
+    </div>
+
+    <!-- result modal (check popup) -->
+    <div id="resultPopcorn" class="result-popcorn">
+        <div class="result-card-gold">
+            <h2 id="resultHeading">🍿 Всички 25</h2>
+            <div style="font-size: 3rem; color:gold;" id="resultEmoji">🏆</div>
+            <p id="resultText" style="color:#efe3bf; font-size:1.4rem;">Браво! Ето отговорите по-долу</p>
+            <button class="gold-btn" id="closeResultBtn" style="margin-top:1.5rem;">СУПЕР</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ---------- MOVIE DATA ----------
+            const quizData = [
+                { emoji: "🦁👑", title: "Цар Лъв" },
+                { emoji: "😬🤴🤴😬", title: "Титаник" },
+                { emoji: "🧙‍♂️💍🌋", title: "Властелинът на пръстените" },
+                { emoji: "🦖🏝️", title: "Джурасик парк" },
+                { emoji: "🚀👨‍🚀🌌", title: "Интерстелар / Марсианецът" },
+                { emoji: "🕷️👨", title: "Спайдър-мен" },
+                { emoji: "🧊🚢💥", title: "Титаник" },
+                { emoji: "👻🔫", title: "Ловци на духове" },
+                { emoji: "🐠🔍🌊", title: "Търсенето на Немо" },
+                { emoji: "🏫⚡👓", title: "Хари Потър" },
+                { emoji: "🤖👦❤️", title: "Изкуствен интелект / A.I." },
+                { emoji: "🐺💰📈", title: "Вълкът от Уолстрийт" },
+                { emoji: "🎩🐇✨", title: " Магьосникът" },
+                { emoji: "🧠💊🔴🔵", title: "Матрицата" },
+                { emoji: "👨‍🍳🐀🍝", title: "Рататуй" },
+                { emoji: "🏎️⚡", title: "Колите" },
+                { emoji: "🧟‍♂️🌍", title: "Z-та световна война" },
+                { emoji: "🧑‍🚀🌽🕳️", title: "Интерстелар" },
+                { emoji: "🕵️‍♂️🧠🔍", title: "Шерлок Холмс" },
+                { emoji: "🏹🔥🎯", title: "Игрите на глада" },
+                { emoji: "👑🗡️⚔️🐉", title: "Игра на тронове" },
+                { emoji: "🧑‍⚖️💼💰", title: "Адвокат на дявола" },
+                { emoji: "🎭🔪🩸", title: "Психо" },
+                { emoji: "🛳️🧊2❄️", title: "Титаник II" },
+                { emoji: "🐒🏙️🗽", title: "Кинг Конг" }
+            ];
+
+            // DOM elements
+            const curtain = document.getElementById('curtain');
+            const raiseBtn = document.getElementById('raiseCurtainBtn');
+            const quizPanel = document.getElementById('quizPanel');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const checkScoreBtn = document.getElementById('checkScoreBtn');
+            const restartBtn = document.getElementById('restartFromQuizBtn');
+            const questionCounter = document.getElementById('questionCounter');
+            const emojiQuestion = document.getElementById('emojiQuestion');
+            const timerDisplay = document.getElementById('timerDisplay');
+            const answersContainer = document.getElementById('answersContainer');
+            const answersList = document.getElementById('answersList');
+            const revealNextBtn = document.getElementById('revealNextAnswerBtn');
+            const resultPopcorn = document.getElementById('resultPopcorn');
+            const closeResultBtn = document.getElementById('closeResultBtn');
+            const resultHeading = document.getElementById('resultHeading');
+            const resultText = document.getElementById('resultText');
+            const resultEmoji = document.getElementById('resultEmoji');
+
+            // state
+            let currentIndex = 0;
+            let timerInterval = null;
+            let secondsLeft = 30;
+            let isQuizActive = false;   // becomes true after curtain raised
+            let answersRevealedCount = 0; // for progressive reveal
+
+            // Helper: stop timer
+            function stopTimer() {
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+            }
+
+            // Update counter
+            function updateCounter() {
+                questionCounter.textContent = `${currentIndex + 1} / 25`;
+            }
+
+            // Timer start (with hide on expire)
+            function startTimerForCurrent() {
+                if (!isQuizActive) return;
+                stopTimer();
+                secondsLeft = 30;
+                timerDisplay.textContent = secondsLeft;
+
+                timerInterval = setInterval(() => {
+                    secondsLeft -= 1;
+                    timerDisplay.textContent = secondsLeft >= 0 ? secondsLeft : 0;
+                    if (secondsLeft <= 0) {
+                        emojiQuestion.textContent = '⌛ ⌛ ⌛';  // hide emoji
+                        stopTimer();
+                        timerDisplay.textContent = "0";
+                    }
+                }, 1000);
+            }
+
+            // Load current question (emojis, timer)
+            function loadQuestion() {
+                if (!isQuizActive) return;
+                emojiQuestion.textContent = quizData[currentIndex].emoji;
+                startTimerForCurrent();
+                updateCounter();
+                prevBtn.disabled = (currentIndex === 0);
+                nextBtn.disabled = (currentIndex === quizData.length - 1);
+            }
+
+            // Navigation
+            function goNext() {
+                if (!isQuizActive) return;
+                if (currentIndex < quizData.length - 1) {
+                    currentIndex++;
+                    loadQuestion();
+                }
+            }
+            function goPrev() {
+                if (!isQuizActive) return;
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    loadQuestion();
+                }
+            }
+
+            // Raise curtain (start quiz)
+            function raiseCurtain() {
+                curtain.classList.add('open');
+                isQuizActive = true;
+                currentIndex = 0;
+                loadQuestion();
+                // reset answers reveal
+                answersRevealedCount = 0;
+                renderAnswersList();
+                answersContainer.style.display = 'none'; // hide until check
+            }
+
+            // Restart to curtain (but curtain already open? we reset)
+            function resetToCurtain() {
+                stopTimer();
+                isQuizActive = false;
+                curtain.classList.remove('open');
+                currentIndex = 0;
+                answersContainer.style.display = 'none';
+                answersRevealedCount = 0;
+                resultPopcorn.style.display = 'none';
+            }
+
+            // Render all answers in list (with hidden class)
+            function renderAnswersList() {
+                let html = '';
+                quizData.forEach((item, idx) => {
+                    const hiddenClass = (idx >= answersRevealedCount) ? 'hidden-answer' : '';
+                    html += `<div class="answer-item ${hiddenClass}">
+                        <span class="answer-emoji">${item.emoji}</span>
+                        <span class="answer-title">${item.title}</span>
+                    </div>`;
+                });
+                answersList.innerHTML = html;
+            }
+
+            // Reveal next answer (progressive)
+            function revealNextAnswer() {
+                if (answersRevealedCount < quizData.length) {
+                    answersRevealedCount++;
+                    renderAnswersList();
+                }
+                if (answersRevealedCount === quizData.length) {
+                    revealNextBtn.textContent = '✅ всички разкрити';
+                    revealNextBtn.disabled = true;
+                }
+            }
+
+            // CHECK button: show answers container + popup
+            function onCheck() {
+                if (!isQuizActive) return;
+                // show answers container
+                answersContainer.style.display = 'block';
+                // reset reveal count (start hidden)
+                answersRevealedCount = 0;
+                renderAnswersList();
+                revealNextBtn.disabled = false;
+                revealNextBtn.textContent = '✨ разкрий следващ';
+                // show result popup
+                const total = quizData.length;
+                const current = currentIndex + 1;
+                resultHeading.innerText = `🍿 ВЪПРОС ${current}/${total}`;
+                resultText.innerText = 'Ето отговорите — разкривай ги бавно със златния бутон.';
+                resultEmoji.innerText = '🏆';
+                resultPopcorn.style.display = 'flex';
+            }
+
+            // Event listeners
+            raiseBtn.addEventListener('click', raiseCurtain);
+            prevBtn.addEventListener('click', goPrev);
+            nextBtn.addEventListener('click', goNext);
+            checkScoreBtn.addEventListener('click', onCheck);
+            restartBtn.addEventListener('click', resetToCurtain);
+            revealNextBtn.addEventListener('click', revealNextAnswer);
+            closeResultBtn.addEventListener('click', () => {
+                resultPopcorn.style.display = 'none';
+            });
+
+            // keyboard nav
+            window.addEventListener('keydown', (e) => {
+                if (!isQuizActive) return;
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    if (!prevBtn.disabled) goPrev();
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    if (!nextBtn.disabled) goNext();
+                }
+            });
+
+            // initial: curtain closed, quiz inactive, answers hidden
+            curtain.classList.remove('open');
+            isQuizActive = false;
+            answersContainer.style.display = 'none';
+            renderAnswersList(); // pre-render but hidden
+        })();
+    </script>
+</body>
+</html>
